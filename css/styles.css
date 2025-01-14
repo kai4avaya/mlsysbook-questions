@@ -1,0 +1,229 @@
+:root {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --button-bg: #2c2c2c;
+    --button-hover: #3c3c3c;
+    --error-bg: #ff4444;
+    --link-color: #64b5f6;
+    --link-hover: #90caf9;
+    --correct-color: #4CAF50;
+    --incorrect-color: #f44336;
+    --explanation-color: #888;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.book-link {
+    color: var(--link-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.book-link:hover {
+    color: var(--link-hover);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+button {
+    padding: 8px 16px;
+    background-color: var(--button-bg);
+    border: none;
+    border-radius: 4px;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background-color: var(--button-hover);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#hot-container {
+    height: calc(100vh - 100px);
+    width: 100%;
+    overflow: hidden;
+    transition: opacity 0.3s ease;
+}
+
+.error-container {
+    display: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.error-container.visible {
+    display: block;
+}
+
+.error-container.error {
+    background-color: var(--error-bg);
+    color: white;
+}
+
+.error-container.success {
+    background-color: var(--correct-color);
+    color: white;
+}
+
+.loader {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.loader.visible {
+    display: flex;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--button-bg);
+    border-radius: 50%;
+    border-top-color: var(--link-color);
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loader-text {
+    color: var(--text-color);
+    font-size: 16px;
+    margin: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Handsontable Dark Theme Overrides */
+.handsontable {
+    font-size: 14px;
+}
+
+.handsontable th {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+}
+
+.handsontable td {
+    color: var(--text-color);
+    padding: 8px !important;
+    line-height: 1.4;
+}
+
+/* Answer styling */
+.handsontable td div {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.handsontable .answer-explanation {
+    color: var(--explanation-color);
+    font-size: 0.9em;
+    margin-left: 15px;
+    display: block;
+}
+
+.handsontable .answer-correct {
+    color: var(--correct-color);
+}
+
+.handsontable .answer-incorrect {
+    color: var(--incorrect-color);
+}
+
+.search-container {
+    position: relative;
+    margin-right: 10px;
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-input {
+    background-color: white;
+    border: none;
+    border-radius: 4px;
+    color: var(--bg-color);
+    padding: 6px 32px 6px 12px;
+    font-size: 14px;
+    width: 100%;
+    height: 28px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--link-color);
+}
+
+.search-input::placeholder {
+    color: #666;
+}
+
+.search-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: #666;
+    opacity: 0.8;
+    pointer-events: none;
+    stroke-width: 2.5px;
+}
+
+.search-input:focus + .search-icon {
+    opacity: 1;
+    color: var(--link-color);
+} 

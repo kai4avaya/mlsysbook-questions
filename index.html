@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SocratiQ - mlsysbook.ai</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/styles/handsontable.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/styles/ht-theme-main.min.css" />
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <h1>SocratiQ - mlsysbook.ai</h1>
+                <a href="https://mlsysbook.ai" target="_blank" class="book-link">Visit MLSysBook →</a>
+            </div>
+            <div class="actions">
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search questions..." class="search-input">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button id="refreshData">Refresh Data</button>
+                <button id="downloadCSV">Download CSV</button>
+            </div>
+        </header>
+        <div id="error-container" class="error-container"></div>
+        <div id="loader" class="loader">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Loading questions from MLSysBook database...</p>
+        </div>
+        <div id="hot-container" class="ht-theme-main-dark-auto"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html> 
