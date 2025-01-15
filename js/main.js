@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let hot;
     let allQuestions = [];
     let originalData = [];
+    const CHUNK_SIZE = 100;
+    let currentChunk = 0;
+    let isLoading = false;
 
     function setLoading(isLoading, message = '') {
         const refreshBtn = document.getElementById('refreshData');
@@ -45,27 +48,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
+    function getDataChunk(data, chunkIndex) {
+        const start = chunkIndex * CHUNK_SIZE;
+        return data.slice(start, start + CHUNK_SIZE);
+    }
+
     function filterData(searchTerm) {
         if (!searchTerm) {
-            hot.loadData(originalData);
+            currentChunk = 0;
+            const initialChunk = getDataChunk(originalData, 0);
+            hot.loadData(initialChunk);
             return;
         }
 
         const searchTermLower = searchTerm.toLowerCase();
         const filteredData = originalData.filter(row => {
-            return (
-                row.question.toLowerCase().includes(searchTermLower) ||
-                row.correctAnswer?.text.toLowerCase().includes(searchTermLower) ||
-                row.wrongAnswer1?.text.toLowerCase().includes(searchTermLower) ||
-                row.wrongAnswer2?.text.toLowerCase().includes(searchTermLower) ||
-                row.wrongAnswer3?.text.toLowerCase().includes(searchTermLower) ||
-                row.chapterId.toLowerCase().includes(searchTermLower) ||
-                row.sectionId.toLowerCase().includes(searchTermLower) ||
-                row.difficulty.toLowerCase().includes(searchTermLower)
-            );
+            // Check every property in the row
+            return Object.entries(row).some(([key, value]) => {
+                // Handle nested objects (like answers)
+                if (value && typeof value === 'object') {
+                    // Search within text and explanation of answers
+                    return (value.text?.toLowerCase().includes(searchTermLower) || 
+                           value.explanation?.toLowerCase().includes(searchTermLower));
+                }
+                // Handle direct string/number values
+                return String(value).toLowerCase().includes(searchTermLower);
+            });
         });
 
+        // When searching, show all results at once for better UX
         hot.loadData(filteredData);
+    }
+
+    function handleScroll(event) {
+        if (!hot || isLoading) return;
+
+        const target = event.target;
+        const scrollPosition = target.scrollTop + target.clientHeight;
+        const maxScroll = target.scrollHeight;
+        const threshold = 200; // pixels from bottom
+
+        if (maxScroll - scrollPosition < threshold) {
+            isLoading = true;
+            const nextChunk = getDataChunk(originalData, currentChunk + 1);
+            
+            if (nextChunk.length > 0) {
+                currentChunk++;
+                const currentData = hot.getData();
+                hot.loadData([...currentData, ...nextChunk]);
+            }
+            
+            setTimeout(() => {
+                isLoading = false;
+            }, 100);
+        }
     }
 
     async function processAllChapters(data) {
@@ -76,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.entries(chapter.sections || {}).forEach(([sectionId, section]) => {
                 Object.entries(section.difficulties || {}).forEach(([difficulty, difficultyData]) => {
                     (difficultyData.questions || []).forEach(question => {
-                        // Split answers into correct and wrong answers
                         const correctAnswer = question.answers.find(a => a.correct);
                         const wrongAnswers = question.answers.filter(a => !a.correct);
 
@@ -128,18 +163,31 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hot) {
                 hot.destroy();
             }
+
+            originalData = questions; // Store complete dataset
+            allQuestions = questions; // Store for CSV export
+            currentChunk = 0;
+            
+            // Initialize with first chunk
+            const initialChunk = getDataChunk(questions, 0);
             
             hot = new Handsontable(container, {
                 ...CONFIG.HOT_SETTINGS,
-                data: questions,
+                data: initialChunk,
                 columns: CONFIG.COLUMNS,
-                height: window.innerHeight - 100
+                height: window.innerHeight - 100,
+                afterRender: () => {
+                    // Setup scroll handler after the table is fully rendered
+                    const scrollElement = container.querySelector('.wtHolder');
+                    if (scrollElement) {
+                        scrollElement.removeEventListener('scroll', handleScroll);
+                        scrollElement.addEventListener('scroll', handleScroll);
+                    }
+                }
             });
             
-            originalData = questions; // Store original data for filtering
-            allQuestions = questions; // Store questions for CSV export
             setLoading(false);
-            showMessage('Table initialized successfully');
+            showMessage('Table initialized successfully', false);
         } catch (error) {
             console.error('Failed to initialize table:', error);
             setLoading(false);
@@ -154,12 +202,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // Use allQuestions for CSV export to include all data
             const exportPlugin = hot.getPlugin('exportFile');
-            exportPlugin.downloadFile('csv', {
-                filename: 'quiz_questions_' + new Date().toISOString().split('T')[0],
+            const csvContent = exportPlugin.exportAsString('csv', {
+                data: allQuestions,
                 columnHeaders: true,
                 rowHeaders: true
             });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'quiz_questions_' + new Date().toISOString().split('T')[0] + '.csv';
+            link.click();
         } catch (error) {
             console.error('Failed to download CSV:', error);
             showMessage('Failed to download CSV. Please try again.', true);
@@ -177,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             filterData(e.target.value.trim());
-        }, 300); // Debounce search for better performance
+        }, 300);
     });
 
     // Initial load
